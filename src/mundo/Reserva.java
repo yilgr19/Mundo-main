@@ -6,6 +6,7 @@ import java.util.List;
 public class Reserva {
     public static List<Reserva> listaReservas = new ArrayList<>();
 
+    private Integer idReserva;
     private String nombre;
     private String apellido;
     private long cedula;
@@ -24,6 +25,7 @@ public class Reserva {
                    String fechaEntrada, String horaEntrada,
                    String fechaSalida, String horaSalida,
                    String tipoHabitacion, int numHuespedes, String metodoPago, int numeroHabitacion) {
+        this.idReserva = null;
         this.nombre = nombre;
         this.apellido = apellido;
         this.cedula = cedula;
@@ -36,6 +38,14 @@ public class Reserva {
         this.numHuespedes = numHuespedes;
         this.metodoPago = metodoPago;
         this.numeroHabitacion = numeroHabitacion;
+    }
+
+    public Integer getIdReserva() {
+        return idReserva;
+    }
+
+    public void setIdReserva(Integer idReserva) {
+        this.idReserva = idReserva;
     }
 
     public String getNombre() {

@@ -1,6 +1,7 @@
 package gui;
 
 import javax.swing.JOptionPane;
+import mundo.OperacionesReservas;
 import mundo.Reserva;
 
 public class ConsultarReserva extends javax.swing.JFrame {
@@ -54,6 +55,12 @@ public class ConsultarReserva extends javax.swing.JFrame {
     }
     
     private void actualizarTablaReservas() {
+        try {
+            Reserva.listaReservas.clear();
+            Reserva.listaReservas.addAll(OperacionesReservas.listarTodas());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "No se pudieron cargar las reservas: " + e.getMessage());
+        }
         modeloTabla.setRowCount(0);
         if (Reserva.listaReservas.isEmpty()) {
             modeloTabla.addRow(new Object[]{

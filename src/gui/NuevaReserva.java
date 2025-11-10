@@ -6,6 +6,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import mundo.Habitaciones;
 import mundo.OperacionesHabitaciones;
+import mundo.OperacionesReservas;
 import mundo.Reserva;
 
 
@@ -16,6 +17,7 @@ public class NuevaReserva extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setIconImage(null); // Quitar el ícono de Java
         cargarHabitacionesDesdeBaseDeDatos();
+        cargarReservasDesdeBaseDeDatos();
         cargarHabitacionesDisponibles();
         
         // Probar el cálculo con las fechas de ejemplo
@@ -31,6 +33,16 @@ public class NuevaReserva extends javax.swing.JFrame {
             Habitaciones.listaHabitaciones.addAll(habitaciones);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "No se pudieron cargar las habitaciones: " + e.getMessage());
+        }
+    }
+
+    private void cargarReservasDesdeBaseDeDatos() {
+        try {
+            List<Reserva> reservas = OperacionesReservas.listarTodas();
+            Reserva.listaReservas.clear();
+            Reserva.listaReservas.addAll(reservas);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "No se pudieron cargar las reservas: " + e.getMessage());
         }
     }
     
@@ -489,6 +501,7 @@ public class NuevaReserva extends javax.swing.JFrame {
                 return;
             }
             
+            cargarReservasDesdeBaseDeDatos();
             long cedulaBuscar = Long.parseLong(cedulareserva.getText().trim());
             
             // Buscar la reserva en la lista
@@ -552,6 +565,7 @@ public class NuevaReserva extends javax.swing.JFrame {
                 return;
             }
             
+            cargarReservasDesdeBaseDeDatos();
             long cedulaModificar = Long.parseLong(cedulareserva.getText().trim());
             
             // Buscar la reserva en la lista
@@ -615,18 +629,18 @@ public class NuevaReserva extends javax.swing.JFrame {
     }
 
     private void crearreservaActionPerformed(java.awt.event.ActionEvent evt) {
- try {
-        String nombre = nombrereserva.getText().trim();
-        String apellido = apellidoreserva.getText().trim();
-        long cedula = Long.parseLong(cedulareserva.getText().trim());
-        long telefono = Long.parseLong(telefonoreserva.getText().trim());
-        String fechaEntrada = fechaentrada.getText().trim();
-        String horaEntrada = horaentrada.getText().trim() + " " + jComboBox2.getSelectedItem().toString();
-        String fechaSalida = fechasalida.getText().trim();
-        String horaSalida = horasalida.getText().trim() + " " + jComboBox3.getSelectedItem().toString();
-        String habitacionSeleccionada = tipohabitacion.getSelectedItem().toString();
-        int numHuespedes = (int) numeroclientes.getValue();
-        String metodoPago = pago.getSelectedItem().toString();
+        try {
+            String nombre = nombrereserva.getText().trim();
+            String apellido = apellidoreserva.getText().trim();
+            long cedula = Long.parseLong(cedulareserva.getText().trim());
+            long telefono = Long.parseLong(telefonoreserva.getText().trim());
+            String fechaEntrada = fechaentrada.getText().trim();
+            String horaEntrada = horaentrada.getText().trim() + " " + jComboBox2.getSelectedItem().toString();
+            String fechaSalida = fechasalida.getText().trim();
+            String horaSalida = horasalida.getText().trim() + " " + jComboBox3.getSelectedItem().toString();
+            String habitacionSeleccionada = tipohabitacion.getSelectedItem().toString();
+            int numHuespedes = (int) numeroclientes.getValue();
+            String metodoPago = pago.getSelectedItem().toString();
 
             if (habitacionSeleccionada.equals("Seleccione habitación")) {
                 JOptionPane.showMessageDialog(this, "Por favor seleccione una habitación.");
@@ -634,15 +648,14 @@ public class NuevaReserva extends javax.swing.JFrame {
             }
 
             int numeroHabitacion = extraerNumeroHabitacion(habitacionSeleccionada);
+            cargarReservasDesdeBaseDeDatos();
 
-            // Verificar si es una actualización o creación nueva
             if ("Actualizar".equals(crearreserva.getText())) {
-                // Modo actualización - buscar y actualizar la reserva existente
                 boolean reservaEncontrada = false;
                 for (Reserva reserva : Reserva.listaReservas) {
                     if (reserva.getCedula() == cedula) {
                         int habitacionAnterior = reserva.getNumeroHabitacion();
-                        
+
                         reserva.setNombre(nombre);
                         reserva.setApellido(apellido);
                         reserva.setTelefono(telefono);
@@ -653,44 +666,45 @@ public class NuevaReserva extends javax.swing.JFrame {
                         reserva.setTipoHabitacion(habitacionSeleccionada);
                         reserva.setNumHuespedes(numHuespedes);
                         reserva.setMetodoPago(metodoPago);
-                        
+                        reserva.setNumeroHabitacion(numeroHabitacion);
+
                         if (habitacionAnterior != numeroHabitacion) {
                             liberarHabitacion(habitacionAnterior);
                             ocuparHabitacion(numeroHabitacion);
-                            reserva.setNumeroHabitacion(numeroHabitacion);
                         }
-                        
+
+                        OperacionesReservas.actualizar(reserva);
                         reservaEncontrada = true;
                         break;
                     }
                 }
-                
+
                 if (reservaEncontrada) {
+                    cargarReservasDesdeBaseDeDatos();
                     JOptionPane.showMessageDialog(this, "Reserva actualizada correctamente.");
                     crearreserva.setText("Reservar");
-                    deshabilitarCampos();
-                    cargarHabitacionesDisponibles();
+                    limpiarCampos();
                 } else {
                     JOptionPane.showMessageDialog(this, "Error: No se pudo encontrar la reserva para actualizar.");
                 }
             } else {
                 ocuparHabitacion(numeroHabitacion);
 
-        Reserva nuevaReserva = new Reserva(
-            nombre, apellido, cedula, telefono,
-            fechaEntrada, horaEntrada, fechaSalida, horaSalida,
-                    habitacionSeleccionada, numHuespedes, metodoPago, numeroHabitacion
-        );
+                Reserva nuevaReserva = new Reserva(
+                        nombre, apellido, cedula, telefono,
+                        fechaEntrada, horaEntrada, fechaSalida, horaSalida,
+                        habitacionSeleccionada, numHuespedes, metodoPago, numeroHabitacion
+                );
 
-        Reserva.listaReservas.add(nuevaReserva);
+                OperacionesReservas.guardar(nuevaReserva);
+                cargarReservasDesdeBaseDeDatos();
                 JOptionPane.showMessageDialog(this, "Reserva creada correctamente. Habitación " + numeroHabitacion + " asignada.");
                 limpiarCampos();
-                cargarHabitacionesDisponibles();
             }
 
-    } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(this, "Cédula o teléfono no válidos. Solo se permiten números.");
-    } catch (Exception e) {
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Cédula o teléfono no válidos. Solo se permiten números.");
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error al procesar la reserva: " + e.getMessage());
         }
     }
@@ -743,38 +757,48 @@ public class NuevaReserva extends javax.swing.JFrame {
         }
     }
     
+    private java.time.LocalDate parsearFechaUi(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        String normalizado = valor.trim()
+                .replace("  -  ", "-")
+                .replace("/", "-");
+        if (normalizado.isEmpty() || normalizado.equals("0-0-0")) {
+            return null;
+        }
+        java.time.format.DateTimeFormatter[] formatos = new java.time.format.DateTimeFormatter[]{
+            java.time.format.DateTimeFormatter.ofPattern("dd-MM-uuuu"),
+            java.time.format.DateTimeFormatter.ofPattern("d-M-uuuu"),
+            java.time.format.DateTimeFormatter.ofPattern("dd-M-uuuu"),
+            java.time.format.DateTimeFormatter.ofPattern("d-MM-uuuu")
+        };
+        for (java.time.format.DateTimeFormatter formato : formatos) {
+            try {
+                return java.time.LocalDate.parse(normalizado, formato);
+            } catch (java.time.format.DateTimeParseException ignored) {
+            }
+        }
+        return null;
+    }
+    
     private int calcularDiasEntreFechas(String fechaEntrada, String fechaSalida) {
         try {
-            // Intentar primero con formato "día-mes-año" (sin espacios)
-            String[] partesEntrada = fechaEntrada.split("-");
-            String[] partesSalida = fechaSalida.split("-");
-            
-            // Si no funciona con guiones, intentar con espacios "día - mes - año"
-            if (partesEntrada.length < 3) {
-                partesEntrada = fechaEntrada.split("  -  ");
-                partesSalida = fechaSalida.split("  -  ");
+            java.time.LocalDate fechaInicio = parsearFechaUi(fechaEntrada);
+            java.time.LocalDate fechaFin = parsearFechaUi(fechaSalida);
+            if (fechaInicio == null || fechaFin == null) {
+                return 0;
             }
-            
-            if (partesEntrada.length >= 3 && partesSalida.length >= 3) {
-                int diaEntrada = Integer.parseInt(partesEntrada[0].trim());
-                int mesEntrada = Integer.parseInt(partesEntrada[1].trim());
-                int añoEntrada = Integer.parseInt(partesEntrada[2].trim());
-                
-                int diaSalida = Integer.parseInt(partesSalida[0].trim());
-                int mesSalida = Integer.parseInt(partesSalida[1].trim());
-                int añoSalida = Integer.parseInt(partesSalida[2].trim());
-                
-                java.time.LocalDate fechaInicio = java.time.LocalDate.of(añoEntrada, mesEntrada, diaEntrada);
-                java.time.LocalDate fechaFin = java.time.LocalDate.of(añoSalida, mesSalida, diaSalida);
-                
-                long dias = java.time.temporal.ChronoUnit.DAYS.between(fechaInicio, fechaFin);
-                return Math.max(1, (int) dias);
+            if (fechaFin.isBefore(fechaInicio)) {
+                JOptionPane.showMessageDialog(this, "La fecha de salida debe ser posterior a la fecha de entrada.");
+                return 0;
             }
+            long dias = java.time.temporal.ChronoUnit.DAYS.between(fechaInicio, fechaFin);
+            return Math.max(1, (int) dias);
         } catch (Exception e) {
             System.out.println("Error calculando días: " + e.getMessage());
             return 0;
         }
-        return 0;
     }
     
     private void mostrarHabitacionEnDropdown(int numeroHabitacion) {
@@ -799,16 +823,15 @@ public class NuevaReserva extends javax.swing.JFrame {
                 return;
             }
             
+            cargarReservasDesdeBaseDeDatos();
             long cedulaEliminar = Long.parseLong(cedulareserva.getText().trim());
             
             // Buscar la reserva en la lista
             Reserva reservaAEliminar = null;
-            int indiceReserva = -1;
             for (int i = 0; i < Reserva.listaReservas.size(); i++) {
                 Reserva reserva = Reserva.listaReservas.get(i);
                 if (reserva.getCedula() == cedulaEliminar) {
                     reservaAEliminar = reserva;
-                    indiceReserva = i;
                     break;
                 }
             }
@@ -834,11 +857,29 @@ public class NuevaReserva extends javax.swing.JFrame {
                 );
                 
                 if (opcion == JOptionPane.YES_OPTION) {
-                    liberarHabitacion(reservaAEliminar.getNumeroHabitacion());
-                    Reserva.listaReservas.remove(indiceReserva);
-                    JOptionPane.showMessageDialog(this, "Reserva eliminada exitosamente. Habitación " + reservaAEliminar.getNumeroHabitacion() + " liberada.");
-                    limpiarCampos();
-                    cargarHabitacionesDisponibles();
+                    boolean eliminada = false;
+                    try {
+                        if (reservaAEliminar.getIdReserva() != null) {
+                            eliminada = OperacionesReservas.eliminarPorId(reservaAEliminar.getIdReserva());
+                        } else {
+                            Reserva reservaDb = OperacionesReservas.buscarPorCedula(reservaAEliminar.getCedula());
+                            if (reservaDb != null && reservaDb.getIdReserva() != null) {
+                                eliminada = OperacionesReservas.eliminarPorId(reservaDb.getIdReserva());
+                            }
+                        }
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(this, "Error al eliminar en la base de datos: " + e.getMessage());
+                        return;
+                    }
+
+                    if (eliminada) {
+                        liberarHabitacion(reservaAEliminar.getNumeroHabitacion());
+                        cargarReservasDesdeBaseDeDatos();
+                        JOptionPane.showMessageDialog(this, "Reserva eliminada exitosamente. Habitación " + reservaAEliminar.getNumeroHabitacion() + " liberada.");
+                        limpiarCampos();
+                    } else {
+                        JOptionPane.showMessageDialog(this, "No se pudo eliminar la reserva en la base de datos.");
+                    }
                 } else {
                     JOptionPane.showMessageDialog(this, "Eliminación cancelada.");
                 }
@@ -881,6 +922,7 @@ public class NuevaReserva extends javax.swing.JFrame {
         pago.setSelectedIndex(0);
         jComboBox2.setSelectedIndex(0);
         jComboBox3.setSelectedIndex(0);
+        crearreserva.setText("Reservar");
         habilitarCampos();
     }
 
