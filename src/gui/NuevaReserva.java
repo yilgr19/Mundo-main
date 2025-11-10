@@ -1,10 +1,12 @@
 
 package gui;
 
-import javax.swing.JOptionPane;
+import java.util.List;
 import javax.swing.DefaultComboBoxModel;
-import mundo.Reserva;
+import javax.swing.JOptionPane;
 import mundo.Habitaciones;
+import mundo.OperacionesHabitaciones;
+import mundo.Reserva;
 
 
 public class NuevaReserva extends javax.swing.JFrame {
@@ -13,12 +15,23 @@ public class NuevaReserva extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(null);
         setIconImage(null); // Quitar el ícono de Java
+        cargarHabitacionesDesdeBaseDeDatos();
         cargarHabitacionesDisponibles();
         
         // Probar el cálculo con las fechas de ejemplo
         java.awt.EventQueue.invokeLater(() -> {
             calcularDiasHospedaje();
         });
+    }
+    
+    private void cargarHabitacionesDesdeBaseDeDatos() {
+        try {
+            List<Habitaciones> habitaciones = OperacionesHabitaciones.listarTodas();
+            Habitaciones.listaHabitaciones.clear();
+            Habitaciones.listaHabitaciones.addAll(habitaciones);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "No se pudieron cargar las habitaciones: " + e.getMessage());
+        }
     }
     
     private void cargarHabitacionesDisponibles() {

@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "NuevaReserva",
+            "request": "launch",
+            "mainClass": "gui.NuevaReserva",
+            "projectName": "Mundo-main_a743bf6c"
+        },
+        {
+            "type": "java",
             "name": "NuevoCliente",
             "request": "launch",
             "mainClass": "gui.NuevoCliente",
