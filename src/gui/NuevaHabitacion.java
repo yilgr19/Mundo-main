@@ -1,7 +1,9 @@
 package gui;
 
+import java.util.List;
 import javax.swing.JOptionPane;
 import mundo.Habitaciones;
+import mundo.OperacionesHabitaciones;
 
 public class NuevaHabitacion extends javax.swing.JFrame {
 
@@ -11,6 +13,17 @@ public class NuevaHabitacion extends javax.swing.JFrame {
         setIconImage(null); 
         textdisponi.setEnabled(false);
         actualizarDisponibilidad();
+        cargarHabitacionesDesdeBaseDeDatos();
+    }
+
+    private void cargarHabitacionesDesdeBaseDeDatos() {
+        try {
+            List<Habitaciones> habitaciones = OperacionesHabitaciones.listarTodas();
+            Habitaciones.listaHabitaciones.clear();
+            Habitaciones.listaHabitaciones.addAll(habitaciones);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "No fue posible cargar las habitaciones: " + e.getMessage());
+        }
     }
 
     private void initComponents() {
@@ -213,29 +226,24 @@ public class NuevaHabitacion extends javax.swing.JFrame {
             }
 
             int numero = Integer.parseInt(textnumhabi.getText().trim());
-            
-            boolean habitacionExiste = false;
-            for (Habitaciones hab : Habitaciones.listaHabitaciones) {
-                if (hab.getNumero() == numero) {
-                    habitacionExiste = true;
-                    break;
-                }
-            }
 
-            if (habitacionExiste) {
+            Habitaciones habitacionExistente = OperacionesHabitaciones.buscar(numero);
+            if (habitacionExistente != null) {
                 JOptionPane.showMessageDialog(this, "Ya existe una habitación con ese número.");
                 return;
             }
 
-            long precio = Long.parseLong(textpreciohabi.getText().trim());
+            double precio = Double.parseDouble(textpreciohabi.getText().trim());
             String descripcion = textdescripcionhab.getText().trim();
             boolean estado = boleanestado.getSelectedIndex() == 0;
 
             Habitaciones nuevaHabitacion = new Habitaciones(numero, precio, descripcion, estado);
+            OperacionesHabitaciones.guardar(nuevaHabitacion);
             Habitaciones.listaHabitaciones.add(nuevaHabitacion);
 
             JOptionPane.showMessageDialog(this, "Habitación guardada correctamente.");
             limpiarCampos();
+            cargarHabitacionesDesdeBaseDeDatos();
 
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "El número y precio deben ser valores numéricos válidos.");
@@ -253,16 +261,7 @@ public class NuevaHabitacion extends javax.swing.JFrame {
 
             int numero = Integer.parseInt(textnumhabi.getText().trim());
             
-            Habitaciones habitacionAEliminar = null;
-            int indice = -1;
-            for (int i = 0; i < Habitaciones.listaHabitaciones.size(); i++) {
-                Habitaciones hab = Habitaciones.listaHabitaciones.get(i);
-                if (hab.getNumero() == numero) {
-                    habitacionAEliminar = hab;
-                    indice = i;
-                    break;
-                }
-            }
+            Habitaciones habitacionAEliminar = OperacionesHabitaciones.buscar(numero);
 
             if (habitacionAEliminar != null) {
                 String mensajeConfirmacion = "¿Está seguro de que desea eliminar la habitación?\n\n" +
@@ -279,9 +278,11 @@ public class NuevaHabitacion extends javax.swing.JFrame {
                 );
 
                 if (opcion == JOptionPane.YES_OPTION) {
-                    Habitaciones.listaHabitaciones.remove(indice);
+                    OperacionesHabitaciones.eliminar(numero);
+                    Habitaciones.listaHabitaciones.removeIf(h -> h.getNumero() == numero);
                     JOptionPane.showMessageDialog(this, "Habitación eliminada exitosamente.");
                     limpiarCampos();
+                    cargarHabitacionesDesdeBaseDeDatos();
                 } else {
                     JOptionPane.showMessageDialog(this, "Eliminación cancelada.");
                 }
@@ -305,19 +306,15 @@ public class NuevaHabitacion extends javax.swing.JFrame {
 
             int numero = Integer.parseInt(textnumhabi.getText().trim());
             
-            Habitaciones habitacionEncontrada = null;
-            for (Habitaciones hab : Habitaciones.listaHabitaciones) {
-                if (hab.getNumero() == numero) {
-                    habitacionEncontrada = hab;
-                    break;
-                }
-            }
+            Habitaciones habitacionEncontrada = OperacionesHabitaciones.buscar(numero);
 
             if (habitacionEncontrada != null) {
                 textpreciohabi.setText(String.valueOf(habitacionEncontrada.getPrecio()));
                 textdescripcionhab.setText(habitacionEncontrada.getDescripcion());
                 boleanestado.setSelectedIndex(habitacionEncontrada.getEstado() ? 0 : 1);
                 actualizarDisponibilidad();
+                Habitaciones.listaHabitaciones.removeIf(h -> h.getNumero() == numero);
+                Habitaciones.listaHabitaciones.add(habitacionEncontrada);
 
                 JOptionPane.showMessageDialog(this, "Habitación encontrada exitosamente.");
             } else {

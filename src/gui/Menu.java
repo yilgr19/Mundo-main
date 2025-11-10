@@ -1,7 +1,10 @@
 
 package gui;
 
+import java.util.List;
 import javax.swing.JOptionPane;
+import mundo.Habitaciones;
+import mundo.OperacionesHabitaciones;
 import mundo.SistemaLogin;
 
 public class Menu extends javax.swing.JFrame {
@@ -11,11 +14,22 @@ public class Menu extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setIconImage(null); // Quitar el ícono de Java
         actualizarInformacionUsuario();
+        cargarHabitacionesIniciales();
     }
     
     private void actualizarInformacionUsuario() {
         String titulo = "SISTEMA DE HOTEL - " + SistemaLogin.obtenerNombreUsuario();
         this.setTitle(titulo);
+    }
+
+    private void cargarHabitacionesIniciales() {
+        try {
+            List<Habitaciones> habitaciones = OperacionesHabitaciones.listarTodas();
+            Habitaciones.listaHabitaciones.clear();
+            Habitaciones.listaHabitaciones.addAll(habitaciones);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "No se pudieron cargar las habitaciones: " + e.getMessage());
+        }
     }
     
 

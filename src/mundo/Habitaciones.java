@@ -7,12 +7,12 @@ public class Habitaciones {
     public static List<Habitaciones> listaHabitaciones = new ArrayList<>();
     
     private int numero;
-    private long precio;
+    private double precio;
     private String descripcion;
     private boolean estado;
     private String disponibilidad;
 
-    public Habitaciones(int numero, long precio, String descripcion, boolean estado) { 
+    public Habitaciones(int numero, double precio, String descripcion, boolean estado) { 
         this.numero = numero;
         this.precio = precio;
         this.descripcion = descripcion; 
@@ -28,11 +28,11 @@ public class Habitaciones {
         this.numero = numero;
     }
 
-    public long getPrecio() {
+    public double getPrecio() {
         return precio;
     }
 
-    public void setPrecio(long precio) {
+    public void setPrecio(double precio) {
         this.precio = precio;
     }
 

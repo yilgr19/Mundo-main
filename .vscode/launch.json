@@ -1,15 +1,35 @@
 {
     "version": "0.2.0",
     "configurations": [
-      {
-        "type": "java",
-        "name": "Menu",
-        "request": "launch",
-        "mainClass": "gui.Menu",
-        "classPaths": [
-          "${workspaceFolder}/build/classes",
-          "${workspaceFolder}/dist/lib/mysql-connector-j-9.5.0 (1).jar"
-        ]
-      }
+        {
+            "type": "java",
+            "name": "NuevoCliente",
+            "request": "launch",
+            "mainClass": "gui.NuevoCliente",
+            "classPaths": [
+                "${workspaceFolder}/build/classes",
+                "${workspaceFolder}/dist/lib/mysql-connector-j-9.5.0 (1).jar"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "NuevaHabitacion",
+            "request": "launch",
+            "mainClass": "gui.NuevaHabitacion",
+            "classPaths": [
+                "${workspaceFolder}/build/classes",
+                "${workspaceFolder}/dist/lib/mysql-connector-j-9.5.0 (1).jar"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Menu",
+            "request": "launch",
+            "mainClass": "gui.Menu",
+            "classPaths": [
+                "${workspaceFolder}/build/classes",
+                "${workspaceFolder}/dist/lib/mysql-connector-j-9.5.0 (1).jar"
+            ]
+        }
     ]
   }
